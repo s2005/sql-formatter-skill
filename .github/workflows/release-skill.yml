@@ -152,7 +152,7 @@ jobs:
       - name: Upload skill artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.build.outputs.skill_name }}-skill-${{ steps.get_version.outputs.version }}
+          name: ${{ steps.build.outputs.skill_name }}-skill
           path: ${{ steps.build.outputs.skill_name }}-skill.zip
           retention-days: 90
 
