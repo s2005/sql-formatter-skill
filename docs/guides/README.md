@@ -10,15 +10,6 @@ These guides provide detailed information about SQL formatting, Oracle Database 
 
 Currently, this skill provides comprehensive SQL formatting guidance directly in the SKILL.md file. Additional guides can be added here as the skill evolves.
 
-## Suggested Future Guides
-
-Potential guides that could be added:
-
-- **Oracle-Specific SQL Features** - Oracle Database 19 specific syntax and formatting
-- **Performance Considerations** - How formatting affects query performance
-- **Migration Guide** - Converting from other SQL dialects to Oracle SQL format
-- **Team Style Guide** - Customizing formatting rules for team standards
-
 ## Referencing Guides
 
 When working with this skill, Claude Code will automatically reference the appropriate documentation based on your needs:
