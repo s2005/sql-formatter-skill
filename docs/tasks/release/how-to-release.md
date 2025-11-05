@@ -17,7 +17,7 @@ Update the VERSION file with the new release version:
 
 ```bash
 # Navigate to repository
-cd /path/to/your-skill-name
+cd /path/to/sql-formatter-skill
 
 # Update version (example: 1.0.0)
 echo "1.0.0" > VERSION
@@ -60,7 +60,7 @@ gh release create v1.0.0 \
 - Feature 3
 
 ## Installation
-Download {skill-name}-skill.zip from assets and extract to your Claude Code skills directory."
+Download sql-formatter-skill.zip from assets and extract to your Claude Code skills directory."
 ```
 
 **Using GitHub Web UI:**
@@ -79,7 +79,7 @@ GitHub Actions will automatically:
 1. Checkout code at the release tag
 2. Extract version from VERSION file
 3. Verify skill structure (SKILL.md with frontmatter)
-4. Build distribution (create {skill-name}-skill.zip)
+4. Build distribution (create sql-formatter-skill.zip)
 5. Validate archive structure
 6. Upload artifact (90-day retention)
 7. Attach to release
@@ -106,7 +106,7 @@ gh release view v1.0.0
 
 **Verify assets:**
 
-1. Check release page has `{skill-name}-skill.zip` attached
+1. Check release page has `sql-formatter-skill.zip` attached
 2. Download and test:
 
 ```bash
@@ -115,10 +115,10 @@ gh release download v1.0.0
 
 # Test extraction
 mkdir -p test-install
-unzip {skill-name}-skill.zip -d test-install
+unzip sql-formatter-skill.zip -d test-install
 
 # Verify structure
-ls -la test-install/{skill-name}/
+ls -la test-install/sql-formatter/
 ```
 
 ## Version Numbering

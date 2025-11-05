@@ -4,30 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a template repository for creating custom Claude Code skills. It provides a structured framework for building skills that extend Claude Code's capabilities with specialized knowledge, workflows, or tool integrations.
+This repository contains the SQL Formatter skill for Claude Code. It provides comprehensive SQL formatting capabilities following Oracle Database 19 best practices, with 13 detailed formatting rules for creating consistent, readable SQL code.
 
 ## Core Architecture
 
 ### Skill Structure
 
-Claude Code skills follow a progressive disclosure pattern with three resource types:
+The SQL Formatter skill uses the following structure:
 
 1. **SKILL.md** (Required) - Main skill configuration with YAML frontmatter
    - Contains `name` and `description` fields that determine when Claude activates the skill
    - Uses imperative/infinitive form (verb-first instructions) throughout
    - Kept lean (<5k words), detailed info moved to references/
 
-2. **scripts/** - Executable code for deterministic, reusable operations
-   - Used when the same code is repeatedly rewritten
-   - Can be executed without loading into context
+2. **references/** - Documentation loaded into context as needed
+   - `sql-formatting-rules.md` contains complete 13-rule formatting specification
+   - Keeps SKILL.md focused while providing detailed formatting rules
 
-3. **references/** - Documentation loaded into context as needed
-   - For schemas, API docs, domain knowledge, policies
-   - Keeps SKILL.md focused while providing detailed information
-
-4. **assets/** - Files used in output (NOT loaded into context)
-   - Templates, images, boilerplate, fonts
-   - Copied/modified in the final output
+3. **examples/** - Example SQL files demonstrating formatting
+   - `unformatted.sql` - SQL before formatting
+   - `formatted.sql` - SQL after formatting
+   - `complex-query.sql` - Complex queries showing all rules applied
 
 ### GitHub Actions Workflow
 
@@ -46,10 +43,10 @@ Install skill to Claude Code skills directory:
 
 ```bash
 # Windows (Git Bash)
-cp -r . "$USERPROFILE/.claude/skills/your-skill-name"
+cp -r . "$USERPROFILE/.claude/skills/sql-formatter"
 
 # Unix/Mac
-cp -r . ~/.claude/skills/your-skill-name
+cp -r . ~/.claude/skills/sql-formatter
 ```
 
 Test activation by asking Claude questions that match the skill description.
@@ -84,12 +81,13 @@ See `docs/tasks/release/how-to-release.md` for detailed instructions.
 ## Important Files
 
 - **SKILL.md** - Main skill file with YAML frontmatter (name, description)
-- **VERSION** - Single version number for releases (e.g., `0.0.1`)
+- **VERSION** - Single version number for releases (e.g., `1.1.0`)
 - **README.md** - User-facing documentation and installation instructions
-- **SETUP.md** - Step-by-step setup guide for customizing the template
+- **references/sql-formatting-rules.md** - Complete SQL formatting specification with 13 rules
+- **examples/** - Example SQL files (unformatted, formatted, complex queries)
 - **.markdownlint-cli2.jsonc** - Markdown linter config (MD013 disabled)
 - **docs/tasks/release/how-to-release.md** - Release workflow documentation
-- **docs/tasks/tests/how-to-test-skill.md** - Testing framework and test cases
+- **docs/tasks/tests/how-to-test-skill.md** - SQL formatter-specific testing guide
 
 ## Skill Development Best Practices
 
@@ -102,12 +100,12 @@ The description field determines when Claude activates the skill. Make it:
 - Include file types, actions, or topics relevant to the skill
 - Use third-person form: "This skill should be used when..."
 
-Example:
+Example (from this skill):
 
 ```yaml
 ---
-name: docker-helper
-description: This skill should be used when the user asks about Docker containers, needs to run docker commands, or wants to manage Docker images and containers. Use when queries mention docker, containerization, or container management.
+name: sql-formatter
+description: This skill should be used when the user asks to format SQL code, polish SQL queries, improve SQL readability, or work with .sql files. Use when queries mention SQL formatting, code beautification, Oracle SQL, or database query polishing.
 ---
 ```
 
@@ -136,28 +134,18 @@ If content exceeds these limits:
 - Split into multiple smaller files
 - Move detailed content to separate reference files
 - Use clear cross-references between files
-- Consider using scripts for large data/schemas
 
-### Bundled Resources Guidelines
+### SQL Formatter Skill Resources
 
-#### When to include scripts/
+This skill includes:
 
-- Code is repeatedly rewritten by Claude
-- Deterministic behavior is critical
-- Complex logic that shouldn't be regenerated
+- **references/sql-formatting-rules.md** - Complete 13-rule specification with examples
+  - Loaded when complex formatting scenarios require detailed rules
+  - Contains all formatting patterns and edge cases
 
-#### When to include references/
-
-- Detailed schemas, API docs, policies
-- Domain-specific knowledge
-- Information that informs Claude's process
-- For files >10k words, include grep patterns in SKILL.md
-
-#### When to include assets/
-
-- Templates, images, boilerplate
-- Files that will be copied/modified in output
-- NOT loaded into context, used in final deliverables
+- **examples/** - Practical SQL examples
+  - Used for testing and demonstrating formatting capabilities
+  - Compare unformatted vs formatted to validate changes
 
 ### Testing Approach
 
@@ -173,18 +161,24 @@ Create specific test cases for each skill feature with expected inputs/outputs.
 
 ## Common Workflows
 
-### Creating a New Skill from Template
+### Testing Changes Locally
 
-1. Update SKILL.md frontmatter (name and description)
-2. Customize SKILL.md content (purpose, usage, prerequisites)
-3. Add implementation (scripts, references, or assets)
-4. Update README.md with skill-specific information
-5. Update VERSION file (start with `0.0.1`)
-6. Test locally by installing to Claude skills directory
-7. Initialize git and push to GitHub
-8. Create release when ready
+1. Make changes to SKILL.md, references, or examples
+2. Install to Claude Code: `cp -r . ~/.claude/skills/sql-formatter`
+3. Test activation with SQL formatting requests
+4. Verify formatting rules are applied correctly
+5. Compare output with examples/formatted.sql
 
-See `SETUP.md` for complete step-by-step instructions.
+### Creating a New Release
+
+1. Test all changes locally using docs/tasks/tests/how-to-test-skill.md
+2. Update VERSION file with new version (e.g., `1.2.0`)
+3. Commit changes: `git commit -m "Release v1.2.0: Description"`
+4. Push to GitHub: `git push`
+5. Create release: `gh release create v1.2.0 --generate-notes`
+6. GitHub Actions automatically builds and attaches skill ZIP
+
+See `docs/tasks/release/how-to-release.md` for detailed instructions.
 
 ### Validation Before Release
 
@@ -195,7 +189,7 @@ Required checks:
 - README.md is customized (no template placeholders)
 - Skill installs correctly to `~/.claude/skills/`
 - Claude activates skill when expected
-- All documented commands/scripts work
+- All formatting rules work correctly
 - Documentation matches actual behavior
 
 ## Troubleshooting
@@ -204,7 +198,7 @@ Required checks:
 
 1. Verify SKILL.md has valid YAML frontmatter: `head -10 SKILL.md`
 2. Check description is specific with trigger words
-3. Try explicit request: "Use the [skill-name] skill to..."
+3. Try explicit request: "Use the sql-formatter skill to format this SQL: [query]"
 4. Restart Claude Code (skills loaded on startup)
 
 ### GitHub Actions Release Fails
@@ -217,11 +211,18 @@ Common issues:
 
 Check workflow logs: `gh run view --log`
 
-### Scripts Don't Execute
+### Formatting Not Applied Correctly
 
-1. Verify scripts are executable: `chmod +x scripts/*.py`
-2. Check required tools installed: `which python`, `which jq`, etc.
-3. Test script manually: `python scripts/example_script.py`
+**Symptoms:**
+- SQL formatting differs from examples
+- Some rules not applied consistently
+
+**Checks:**
+
+1. Compare with reference files: `examples/formatted.sql`
+2. Review detailed rules: `references/sql-formatting-rules.md`
+3. Test with simple queries first (basic SELECT)
+4. Ensure input SQL is syntactically valid
 
 ## Documentation Structure
 
