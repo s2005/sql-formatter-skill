@@ -1,76 +1,90 @@
-# Examples
+# SQL Formatter Examples
 
-This directory contains example files and usage scenarios for your skill.
+This directory contains example SQL files demonstrating the formatting capabilities of the SQL Formatter skill.
 
-## Purpose
+## Files
 
-Examples help users understand how to use your skill effectively. Include:
+### unformatted.sql
 
-- Sample input files
-- Sample configuration files
-- Example workflows
-- Expected outputs
+Contains unformatted SQL examples showing typical "raw" SQL code:
+- Simple SELECT statements
+- JOIN queries
+- INSERT statements
+- UPDATE statements
+- CASE expressions
+- Common Table Expressions (CTEs)
 
-## Structure
+These examples show SQL as it might be written quickly or copied from various sources.
 
-Organize examples by use case:
+### formatted.sql
 
-```text
-examples/
-├── README.md           # This file
-├── basic/              # Basic usage examples
-│   ├── input.txt
-│   └── expected-output.txt
-├── advanced/           # Advanced usage examples
-│   ├── config.json
-│   └── workflow.md
-└── error-cases/        # Error handling examples
-    └── invalid-input.txt
-```
+Contains the same SQL from `unformatted.sql` but properly formatted according to the skill's formatting rules:
+- UPPERCASE keywords
+- lowercase identifiers
+- Proper indentation (4 spaces)
+- Vertical alignment of columns and conditions
+- Consistent spacing and line breaks
 
-## Usage
+Use this to compare before/after formatting and understand the formatting rules.
 
-Reference these examples in your SKILL.md:
+### complex-query.sql
 
-```markdown
-## Examples
+A comprehensive example demonstrating all formatting rules in a single query:
+- Multiple CTEs with complex logic
+- Multiple JOIN types (INNER JOIN, LEFT JOIN)
+- Complex WHERE clauses with grouped conditions
+- Multiple CASE expressions
+- Window functions (RANK() OVER)
+- Aggregate functions
+- ORDER BY with multiple expressions
 
-See `examples/` directory for sample files:
+This example shows how the formatting rules apply to real-world, production-quality queries.
 
-**Basic Usage:**
-```bash
-# Run with basic example
-python scripts/your_script.py --input examples/basic/input.txt
-```
+## Using These Examples
 
-**Advanced Usage:**
+### Learning the Formatting Style
 
-```bash
-# Run with advanced config
-python scripts/your_script.py --config examples/advanced/config.json
-```
+1. Open `unformatted.sql` to see "before" examples
+2. Open `formatted.sql` to see "after" examples
+3. Compare line-by-line to understand the transformations
+4. Study `complex-query.sql` to see all rules applied together
 
-## Best Practices
+### Testing the Skill
 
-1. **Keep examples simple** - Focus on one concept per example
-2. **Provide expected output** - Show what users should expect
-3. **Explain edge cases** - Include examples of error scenarios
-4. **Keep files small** - Use minimal data to demonstrate concepts
-5. **Document clearly** - Add comments or README files
+1. Copy content from `unformatted.sql`
+2. Ask Claude Code to format it using this skill
+3. Compare the result with `formatted.sql`
+4. Verify all formatting rules are applied correctly
 
-## Adding Examples
+### Creating Your Own Examples
 
-When adding new examples:
+Use these files as templates for:
+- Testing new formatting scenarios
+- Reporting formatting issues
+- Contributing improvements to the skill
+- Training team members on SQL formatting standards
 
-1. Create appropriately named files
-2. Add clear comments/documentation
-3. Reference in SKILL.md
-4. Test to ensure they work
-5. Update this README
+## Formatting Rules Demonstrated
 
-## Tips
+These examples demonstrate all 13 formatting rules:
 
-- Use realistic data (but sanitize sensitive information)
-- Include both success and failure cases
-- Show common patterns users might encounter
-- Provide copy-paste-ready commands
+1. **Keywords** - All SQL keywords in UPPERCASE
+2. **Indentation** - Consistent 4-space indentation
+3. **Whitespace** - Single space around operators and after commas
+4. **Aliasing** - AS keyword with proper spacing
+5. **Single Line Initial** - First column/condition on same line as clause
+6. **Line Breaks** - New line for each clause and item
+7. **Vertical Alignment** - Columns and conditions aligned
+8. **CTEs** - Proper WITH clause structure
+9. **Joins** - Explicit JOIN types with aligned ON clauses
+10. **Comments** - Standard comment styles
+11. **Grouping** - Parentheses for related conditions
+12. **Ordering** - Logical column and sort order
+13. **CASE Expressions** - Aligned WHEN/THEN/ELSE/END
+
+## Notes
+
+- All examples use Oracle Database 19 syntax
+- Examples focus on formatting, not query optimization
+- Formatted queries preserve the original logic and functionality
+- Use these as reference when formatting your own SQL code

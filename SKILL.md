@@ -1,171 +1,278 @@
 ---
-name: your-skill-name
-description: This skill should be used when the user asks about [X], needs to [Y], or mentions [Z]. Use when queries involve [key terms, file types, specific actions]. Be specific about trigger words and scenarios.
+name: sql-formatter
+description: This skill should be used when the user asks to format SQL code, polish SQL queries, improve SQL readability, or work with .sql files. Use when queries mention SQL formatting, code beautification, Oracle SQL, or database query polishing.
 ---
 
-# Your Skill Name
+# SQL Code Formatter
 
-**Note:** This template follows Anthropic's skill-creator best practices. Use imperative/infinitive form (verb-first instructions) throughout.
+Format, polish, and document SQL code following Oracle Database 19 best practices with consistent style and readability.
 
 ## Purpose
 
-[2-3 sentences] Explain what this skill does and why it's useful. Be specific about the problems it solves.
-
-Example: "This skill provides tools and workflows for rotating, cropping, and editing PDF documents. It simplifies PDF manipulation tasks that would otherwise require re-writing the same code repeatedly."
+This skill provides comprehensive SQL code formatting rules and guidelines for Oracle Database 19. It enforces consistent code style, improves readability, and applies industry-standard formatting conventions to SQL queries, DDL statements, and DML operations.
 
 ## When to Use This Skill
 
-This skill should be used when:
+Use this skill when:
 
-- The user asks about [specific topic]
-- The user needs to [specific action]
-- Working with [specific files/formats]
-- Queries mention [key terms]
+- Formatting or beautifying SQL code
+- Working with .sql files that need polishing
+- Improving SQL query readability
+- Standardizing SQL code style across projects
+- Documenting complex SQL queries
+- Reviewing or refactoring existing SQL code
+- Converting unformatted SQL to well-structured queries
+
+## Core Formatting Principles
+
+### 1. Case Conventions
+
+- **SQL Keywords**: UPPERCASE (SELECT, FROM, WHERE, JOIN, etc.)
+- **Identifiers**: lowercase (column names, table names, aliases)
+- **Consistency**: Maintain consistent casing throughout queries
 
 Example:
+```sql
+SELECT employee_id,
+       first_name,
+       last_name
+  FROM employees
+ WHERE department_id = 10;
+```
 
-- The user asks to rotate, edit, or manipulate PDF files
-- The user needs to perform batch operations on PDFs
-- Working with PDF documents that require structural changes
-- Queries mention "PDF", "rotate", "crop", "merge", or "split"
+### 2. Indentation and Alignment
 
-## Prerequisites
+- Use **4 spaces** for indentation (no tabs)
+- Align subsequent columns/conditions vertically with the first item
+- Indent sub-queries one level deeper than parent query
+- Align clause keywords (SELECT, FROM, WHERE) at consistent positions
 
-List any requirements or setup needed:
+### 3. Line Breaks and Structure
 
-- Required tools (e.g., Python 3.6+, jq, etc.)
-- Required files or configuration
-- Environment setup
-- Permissions needed
+- **First item on same line**: Start first column/condition on the same line as the clause keyword
+- **New line for each item**: Each subsequent column, condition, or table goes on a new line
+- **New line for clauses**: Start each major clause (SELECT, FROM, WHERE, JOIN, GROUP BY, ORDER BY, HAVING) on a new line
+- **Vertical alignment**: Align continuation items vertically
 
-Example: "Requires Python 3.8+ with PyPDF2 library installed. Install with: `pip install PyPDF2`"
+Example:
+```sql
+SELECT first_column,
+       second_column,
+       third_column
+  FROM table_name
+ WHERE first_condition
+   AND second_condition
+   AND third_condition;
+```
+
+### 4. Operators and Spacing
+
+- Single space on either side of operators (=, <, >, <=, >=, !=, ||, +, -, *, /)
+- Single space after commas
+- Single space around AS keyword for aliases
+
+### 5. Common Table Expressions (CTEs)
+
+- Begin with WITH keyword followed by CTE name
+- Place AS ( on the same line as CTE name
+- Close with ) on new line, aligned with WITH
+- Separate multiple CTEs with comma and line break
+
+Example:
+```sql
+WITH active_employees AS (
+    SELECT employee_id,
+           first_name,
+           last_name
+      FROM employees
+     WHERE status = 'ACTIVE'
+),
+department_summary AS (
+    SELECT department_id,
+           COUNT(*) AS employee_count
+      FROM active_employees
+     GROUP BY department_id
+)
+SELECT *
+  FROM department_summary;
+```
+
+### 6. JOIN Clauses
+
+- Explicitly specify JOIN type (INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN)
+- Place JOIN and first ON condition on same line
+- Indent JOIN to align with FROM clause
+- Additional ON conditions go on new lines with AND keyword
+
+Example:
+```sql
+SELECT e.employee_id,
+       e.first_name,
+       d.department_name
+  FROM employees e
+ INNER JOIN departments d ON e.department_id = d.department_id
+        AND e.status = 'ACTIVE'
+        AND d.status = 'ACTIVE';
+```
+
+### 7. CASE Expressions
+
+- Start CASE with first WHEN on same line
+- Each subsequent WHEN, all THEN, and ELSE on separate lines
+- Align WHEN, THEN, and ELSE vertically
+- Place END aligned with CASE
+- Column alias on same line as END
+
+Example:
+```sql
+SELECT CASE WHEN salary < 50000
+            THEN 'Low'
+            WHEN salary BETWEEN 50000 AND 100000
+            THEN 'Medium'
+            ELSE 'High'
+       END AS salary_category
+  FROM employees;
+```
+
+### 8. INSERT Statements
+
+- List columns in parentheses, one per line (except first)
+- Align columns vertically
+- VALUES clause follows same pattern
+
+Example:
+```sql
+INSERT INTO employees (
+            employee_id,
+            first_name,
+            last_name,
+            department_id
+) VALUES (
+            1001,
+            'Jane',
+            'Smith',
+            20
+);
+```
+
+### 9. UPDATE Statements
+
+- Place table name on same line or new line after UPDATE
+- SET clause on new line
+- Each column assignment on new line (except first)
+- WHERE clause on new line
+
+Example:
+```sql
+UPDATE employees
+   SET first_name = 'John',
+       last_name = 'Doe',
+       salary = 75000
+ WHERE employee_id = 1001;
+```
+
+### 10. Comments
+
+- Use `--` for single-line comments
+- Use `/* comment */` for multi-line comments
+- Add comments to explain complex logic only when explicitly requested
+- Place comments above the code they describe
 
 ## Bundled Resources
 
-This skill follows the progressive disclosure principle with three resource types:
-
-### Scripts (`scripts/`)
-
-Executable code for tasks requiring deterministic reliability or frequently rewritten.
-
-**When to include:** When the same code is repeatedly rewritten or deterministic behavior is needed.
-
-**Included scripts:**
-
-- `scripts/example_script.py` - [Description of what it does]
-
-**Usage:**
-
-```bash
-python scripts/example_script.py --option value
-```
-
 ### References (`references/`)
 
-Documentation loaded into context as needed to inform Claude's process.
+- `references/sql-formatting-rules.md` - Complete formatting specification with all 13 rules and detailed examples
 
-**When to include:** For detailed documentation, schemas, API specs, policies, or domain knowledge.
-
-**Included references:**
-
-- `references/example_reference.md` - [Description of what it contains]
-
-**Note:** Keep SKILL.md lean; move detailed information to reference files. For large files (>10k words), include grep search patterns in this section.
-
-### Assets (`assets/`)
-
-Files used in output, not loaded into context (templates, images, boilerplate).
-
-**When to include:** When the skill needs files for the final output.
-
-**Included assets:**
-
-- `assets/example_asset.txt` - [Description of what it's used for]
-
-**Usage:** Copy, modify, or reference these assets in the output produced.
+Load this reference when working with complex SQL formatting scenarios or when users need detailed rule explanations.
 
 ## How to Use This Skill
 
-Provide clear, actionable instructions using imperative form. Reference bundled resources where appropriate.
+### Basic SQL Formatting
 
-### Basic Workflow
+When user provides unformatted SQL code:
 
-**Task 1: [Common Task]**
+1. Identify SQL statement type (SELECT, INSERT, UPDATE, DELETE, CREATE, etc.)
+2. Apply core formatting principles from this skill
+3. Ensure keywords are UPPERCASE and identifiers are lowercase
+4. Apply proper indentation (4 spaces)
+5. Align columns, conditions, and clauses vertically
+6. Return formatted SQL code
 
-1. Run the script: `python scripts/example_script.py --input file.pdf`
-2. Verify the output in the specified directory
-3. Handle any errors using the troubleshooting guide below
+### Advanced Formatting
 
-**Task 2: [Another Task]**
+For complex queries with CTEs, joins, subqueries, and CASE expressions:
 
-1. Read the reference documentation: `references/example_reference.md`
-2. Apply the workflow to the user's specific case
-3. Use assets from `assets/` as needed
+1. Read `references/sql-formatting-rules.md` for detailed specifications
+2. Apply all 13 formatting rules in sequence
+3. Pay special attention to vertical alignment
+4. Ensure consistent indentation at all nesting levels
+5. Validate that all examples in the reference are followed
 
-### Advanced Workflow
+### Working with .sql Files
 
-**Task 3: [Complex Task]**
+When user requests formatting of .sql files:
 
-1. Combine multiple scripts for batch processing
-2. Reference advanced patterns in `references/advanced.md`
-3. Customize asset templates for specific use cases
+1. Read the SQL file content
+2. Apply formatting rules to each statement
+3. Preserve existing comments unless reformatting is requested
+4. Write back formatted SQL to the file or display for review
+5. Ensure file encoding is preserved (UTF-8 recommended)
 
 ## Key Information
 
-Important details about the skill:
-
-- **Tool/Library:** Name and version
-- **File locations:** Where files are stored
-- **Output format:** What format output is provided
-- **Limitations:** What the skill cannot do
-
-Example:
-
-- **Tool/Library:** PyPDF2 v3.0+
-- **Input:** PDF files from any location
-- **Output:** Modified PDF files in the same directory or specified output path
-- **Limitations:** Cannot edit PDF content (text/images), only structural operations
-
-## Troubleshooting
-
-Common errors and solutions using imperative form:
-
-**Error: [Error Message]**
-
-- **Cause:** [Why this occurs]
-- **Solution:** [How to fix]
-  1. Check [specific condition]
-  2. Run [specific command]
-  3. Verify [expected outcome]
-
-**Error: [Another Error]**
-
-- **Cause:** [Why this occurs]
-- **Solution:** [How to fix]
+- **Database:** Oracle Database 19
+- **Indentation:** 4 spaces (no tabs)
+- **Keywords:** UPPERCASE
+- **Identifiers:** lowercase
+- **Line Length:** No strict limit, but prefer readability
+- **File Extension:** .sql
 
 ## Best Practices
 
-- Use [specific approach] for [specific scenario]
-- Avoid [anti-pattern] because [reason]
-- Prefer [better approach] over [alternative]
-- Test [what to test] before [what depends on it]
+- Apply formatting consistently across all SQL files in a project
+- Format SQL before committing to version control
+- Use vertical alignment to improve readability
+- Keep related conditions grouped with parentheses
+- Add comments sparingly, only for complex logic
+- Test formatted SQL to ensure functionality is preserved
+- Preserve the logical structure and query optimization
 
-## Additional Notes
+## Troubleshooting
 
-Important considerations:
+**Issue: Query becomes too long horizontally**
+- Break long expressions across multiple lines
+- Use CTEs to simplify complex subqueries
+- Split long CASE expressions into multiple lines
 
-- Edge cases or special scenarios
-- Performance considerations
-- Security implications
-- Related tools or resources
-- When to use alternative approaches
+**Issue: Unclear which columns belong to which clause**
+- Ensure consistent vertical alignment
+- Use proper indentation (4 spaces per level)
+- Verify first column/condition is on same line as clause keyword
+
+**Issue: Complex joins are hard to read**
+- Place each JOIN on its own line
+- Align all JOINs with FROM clause
+- Put additional ON conditions on separate lines with AND
+
+**Issue: Formatted SQL doesn't execute**
+- Verify formatting didn't introduce syntax errors
+- Check that all parentheses are balanced
+- Ensure string literals are properly quoted
+- Test the query after formatting
 
 ## Examples
 
-**Note:** Remove this section or provide real examples. Avoid hypothetical placeholders.
+See the `examples/` directory for sample SQL files showing:
 
-Reference actual files in the skill directory:
+- `examples/unformatted.sql` - Before formatting
+- `examples/formatted.sql` - After applying formatting rules
+- `examples/complex-query.sql` - Complex query with CTEs and joins
 
-- See `examples/sample-input.txt` for input format
-- See `examples/expected-output.txt` for expected results
-- See `assets/template.html` for the output template structure
+## Additional Notes
+
+- This skill focuses on formatting and style, not query optimization
+- The formatting rules preserve Oracle SQL syntax and semantics
+- For very large SQL files (>1000 lines), consider formatting sections separately
+- Formatted SQL is easier to review, debug, and maintain
+- Consistent formatting improves team collaboration and code reviews
