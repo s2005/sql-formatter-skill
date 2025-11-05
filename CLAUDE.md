@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a template repository for creating custom Claude Code skills. It provides a structured framework for building skills that extend Claude Code's capabilities with specialized knowledge, workflows, or tool integrations.
+This repository contains the SQL Formatter skill for Claude Code. It provides comprehensive SQL formatting capabilities following Oracle Database 19 best practices, with 13 detailed formatting rules for creating consistent, readable SQL code.
 
 ## Core Architecture
 
@@ -46,10 +46,10 @@ Install skill to Claude Code skills directory:
 
 ```bash
 # Windows (Git Bash)
-cp -r . "$USERPROFILE/.claude/skills/your-skill-name"
+cp -r . "$USERPROFILE/.claude/skills/sql-formatter"
 
 # Unix/Mac
-cp -r . ~/.claude/skills/your-skill-name
+cp -r . ~/.claude/skills/sql-formatter
 ```
 
 Test activation by asking Claude questions that match the skill description.
@@ -84,12 +84,13 @@ See `docs/tasks/release/how-to-release.md` for detailed instructions.
 ## Important Files
 
 - **SKILL.md** - Main skill file with YAML frontmatter (name, description)
-- **VERSION** - Single version number for releases (e.g., `0.0.1`)
+- **VERSION** - Single version number for releases (e.g., `1.1.0`)
 - **README.md** - User-facing documentation and installation instructions
-- **SETUP.md** - Step-by-step setup guide for customizing the template
+- **references/sql-formatting-rules.md** - Complete SQL formatting specification with 13 rules
+- **examples/** - Example SQL files (unformatted, formatted, complex queries)
 - **.markdownlint-cli2.jsonc** - Markdown linter config (MD013 disabled)
 - **docs/tasks/release/how-to-release.md** - Release workflow documentation
-- **docs/tasks/tests/how-to-test-skill.md** - Testing framework and test cases
+- **docs/tasks/tests/how-to-test-skill.md** - SQL formatter-specific testing guide
 
 ## Skill Development Best Practices
 
@@ -173,18 +174,24 @@ Create specific test cases for each skill feature with expected inputs/outputs.
 
 ## Common Workflows
 
-### Creating a New Skill from Template
+### Testing Changes Locally
 
-1. Update SKILL.md frontmatter (name and description)
-2. Customize SKILL.md content (purpose, usage, prerequisites)
-3. Add implementation (scripts, references, or assets)
-4. Update README.md with skill-specific information
-5. Update VERSION file (start with `0.0.1`)
-6. Test locally by installing to Claude skills directory
-7. Initialize git and push to GitHub
-8. Create release when ready
+1. Make changes to SKILL.md, references, or examples
+2. Install to Claude Code: `cp -r . ~/.claude/skills/sql-formatter`
+3. Test activation with SQL formatting requests
+4. Verify formatting rules are applied correctly
+5. Compare output with examples/formatted.sql
 
-See `SETUP.md` for complete step-by-step instructions.
+### Creating a New Release
+
+1. Test all changes locally using docs/tasks/tests/how-to-test-skill.md
+2. Update VERSION file with new version (e.g., `1.2.0`)
+3. Commit changes: `git commit -m "Release v1.2.0: Description"`
+4. Push to GitHub: `git push`
+5. Create release: `gh release create v1.2.0 --generate-notes`
+6. GitHub Actions automatically builds and attaches skill ZIP
+
+See `docs/tasks/release/how-to-release.md` for detailed instructions.
 
 ### Validation Before Release
 
@@ -204,7 +211,7 @@ Required checks:
 
 1. Verify SKILL.md has valid YAML frontmatter: `head -10 SKILL.md`
 2. Check description is specific with trigger words
-3. Try explicit request: "Use the [skill-name] skill to..."
+3. Try explicit request: "Use the sql-formatter skill to format this SQL: [query]"
 4. Restart Claude Code (skills loaded on startup)
 
 ### GitHub Actions Release Fails
