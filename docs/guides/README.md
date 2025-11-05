@@ -1,98 +1,56 @@
-# Guides
+# SQL Formatter Skill Guides
 
-This directory contains additional documentation and guides for your skill.
+This directory contains additional documentation and guides for the SQL Formatter skill.
 
 ## Purpose
 
-Guides provide detailed information beyond the basic SKILL.md file:
+These guides provide detailed information about SQL formatting, Oracle Database 19 best practices, and how to effectively use the SQL Formatter skill with Claude Code.
 
-- Reference documentation
-- Advanced usage guides
-- Platform-specific instructions
-- Troubleshooting guides
+## Available Guides
 
-## Suggested Guides
+Currently, this skill provides comprehensive SQL formatting guidance directly in the SKILL.md file. Additional guides can be added here as the skill evolves.
 
-### Platform-Specific Guides
+## Suggested Future Guides
 
-If your skill has platform-specific behavior:
+Potential guides that could be added:
 
-- `windows-guide.md` - Windows-specific commands and paths
-- `unix-guide.md` - Unix/Mac-specific commands and paths
-- `linux-guide.md` - Linux-specific instructions
-
-### Reference Guides
-
-- `api-reference.md` - API or command reference
-- `configuration.md` - Configuration options
-- `troubleshooting.md` - Common issues and solutions
-
-### Usage Guides
-
-- `getting-started.md` - Beginner's guide
-- `advanced-usage.md` - Advanced techniques
-- `best-practices.md` - Recommended approaches
+- **Oracle-Specific SQL Features** - Oracle Database 19 specific syntax and formatting
+- **Performance Considerations** - How formatting affects query performance
+- **Migration Guide** - Converting from other SQL dialects to Oracle SQL format
+- **Team Style Guide** - Customizing formatting rules for team standards
 
 ## Referencing Guides
 
-Link to guides from your SKILL.md:
+When working with this skill, Claude Code will automatically reference the appropriate documentation based on your needs:
 
-```markdown
-## Platform-Specific Instructions
+- For basic SQL formatting, the main SKILL.md provides all necessary guidelines
+- For detailed formatting rules, see `references/sql-formatting-rules.md`
+- For examples, see the `examples/` directory
 
-For detailed platform-specific commands:
-- Windows: See `docs/guides/windows-guide.md`
-- Unix/Mac: See `docs/guides/unix-guide.md`
+## Using the SQL Formatter Skill
 
-## Advanced Usage
+The SQL Formatter skill activates automatically when you:
 
-See `docs/guides/advanced-usage.md` for:
-- Advanced configuration
-- Complex workflows
-- Performance optimization
-```
+- Ask to format SQL code
+- Work with .sql files
+- Request SQL code polishing or beautification
+- Mention SQL query readability improvements
 
-## Best Practices
+Simply describe what you need, and Claude Code will apply the formatting rules from this skill.
 
-1. **Keep guides focused** - One topic per guide
-2. **Use clear headings** - Make content scannable
-3. **Provide examples** - Show, don't just tell
-4. **Keep updated** - Maintain as skill evolves
-5. **Cross-link** - Reference related guides
+## Contributing Guides
 
-## Adding Guides
+To add a new guide:
 
-When adding a new guide:
-
-1. Create markdown file with clear name
-2. Add table of contents for long guides
-3. Include examples and code snippets
-4. Reference from SKILL.md
-5. Update this README
-6. Test all commands/examples
-
-## Guide Template
-
-```markdown
-# Guide Title
-
-Brief description of what this guide covers.
-
-## Prerequisites
-
-- Requirement 1
-- Requirement 2
-
-## Section 1
-
-Content with examples
-
-## Section 2
-
-More content
+1. Create a markdown file with a descriptive name (e.g., `oracle-specific-features.md`)
+2. Follow the SQL formatting principles defined in SKILL.md
+3. Include practical examples
+4. Keep the guide focused on a single topic
+5. Update this README to list the new guide
 
 ## Related Resources
 
-- Link to related guide
-- Link to external resource
-```
+- **Main Skill Documentation**: See SKILL.md in the root directory
+- **Detailed Formatting Rules**: See `references/sql-formatting-rules.md`
+- **Example SQL Files**: See `examples/` directory
+- **Oracle Database Documentation**: [Oracle Database 19c Documentation](https://docs.oracle.com/en/database/oracle/oracle-database/19/)
