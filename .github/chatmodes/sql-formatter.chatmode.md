@@ -1,6 +1,6 @@
 ---
 description: Format SQL code following Oracle Database 19 best practices with consistent style, UPPERCASE keywords, lowercase identifiers, 4-space indentation, and vertical alignment.
-tools: ['edit', 'new', 'search']
+tools: ['vscode/getProjectSetupInfo', 'vscode/installExtension', 'vscode/newWorkspace', 'vscode/runCommand', 'read/readFile', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'todo']
 ---
 
 # SQL Formatter - Chat Mode
