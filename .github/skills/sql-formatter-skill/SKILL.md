@@ -32,6 +32,7 @@ Use this skill when:
 - **Consistency**: Maintain consistent casing throughout queries
 
 Example:
+
 ```sql
 SELECT employee_id,
        first_name,
@@ -55,6 +56,7 @@ SELECT employee_id,
 - **Vertical alignment**: Align continuation items vertically
 
 Example:
+
 ```sql
 SELECT first_column,
        second_column,
@@ -79,6 +81,7 @@ SELECT first_column,
 - Separate multiple CTEs with comma and line break
 
 Example:
+
 ```sql
 WITH active_employees AS (
     SELECT employee_id,
@@ -105,6 +108,7 @@ SELECT *
 - Additional ON conditions go on new lines with AND keyword
 
 Example:
+
 ```sql
 SELECT e.employee_id,
        e.first_name,
@@ -124,6 +128,7 @@ SELECT e.employee_id,
 - Column alias on same line as END
 
 Example:
+
 ```sql
 SELECT CASE WHEN salary < 50000
             THEN 'Low'
@@ -141,6 +146,7 @@ SELECT CASE WHEN salary < 50000
 - VALUES clause follows same pattern
 
 Example:
+
 ```sql
 INSERT INTO employees (
             employee_id,
@@ -163,6 +169,7 @@ INSERT INTO employees (
 - WHERE clause on new line
 
 Example:
+
 ```sql
 UPDATE employees
    SET first_name = 'John',
@@ -240,22 +247,26 @@ When user requests formatting of .sql files:
 
 ## Troubleshooting
 
-**Issue: Query becomes too long horizontally**
+### Issue: Query becomes too long horizontally
+
 - Break long expressions across multiple lines
 - Use CTEs to simplify complex subqueries
 - Split long CASE expressions into multiple lines
 
-**Issue: Unclear which columns belong to which clause**
+### Issue: Unclear which columns belong to which clause
+
 - Ensure consistent vertical alignment
 - Use proper indentation (4 spaces per level)
 - Verify first column/condition is on same line as clause keyword
 
-**Issue: Complex joins are hard to read**
+### Issue: Complex joins are hard to read
+
 - Place each JOIN on its own line
 - Align all JOINs with FROM clause
 - Put additional ON conditions on separate lines with AND
 
-**Issue: Formatted SQL doesn't execute**
+### Issue: Formatted SQL doesn't execute
+
 - Verify formatting didn't introduce syntax errors
 - Check that all parentheses are balanced
 - Ensure string literals are properly quoted
