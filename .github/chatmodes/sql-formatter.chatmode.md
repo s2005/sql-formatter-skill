@@ -182,12 +182,12 @@ DELETE FROM employees
 
 ```sql
 MERGE INTO employees e
-USING employee_updates u ON (e.employee_id = u.employee_id)
+USING (SELECT employee_id,
+              salary * 1.1 AS new_salary
+         FROM employees
+        WHERE department_id = 80) u ON (e.employee_id = u.employee_id)
  WHEN MATCHED THEN
-      UPDATE SET e.salary = u.new_salary
- WHEN NOT MATCHED THEN
-      INSERT (employee_id, first_name, last_name)
-      VALUES (u.employee_id, u.first_name, u.last_name);
+      UPDATE SET e.salary = u.new_salary;
 ```
 
 ## Common Scenarios
