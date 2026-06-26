@@ -25,6 +25,8 @@ Use this skill when:
 
 ## Core Formatting Principles
 
+These principles summarize the most common cases. The complete 13-rule specification lives in `references/sql-formatting-rules.md`; load it for full coverage and edge cases.
+
 ### 1. Case Conventions
 
 - **SQL Keywords**: UPPERCASE (SELECT, FROM, WHERE, JOIN, etc.)
@@ -58,13 +60,13 @@ SELECT employee_id,
 Example:
 
 ```sql
-SELECT first_column,
-       second_column,
-       third_column
-  FROM table_name
- WHERE first_condition
-   AND second_condition
-   AND third_condition;
+SELECT employee_id,
+       first_name,
+       last_name
+  FROM employees
+ WHERE department_id = 50
+   AND salary > 5000
+   AND commission_pct IS NOT NULL;
 ```
 
 ### 4. Operators and Spacing
@@ -83,17 +85,18 @@ SELECT first_column,
 Example:
 
 ```sql
-WITH active_employees AS (
+WITH high_earners AS (
     SELECT employee_id,
            first_name,
-           last_name
+           last_name,
+           department_id
       FROM employees
-     WHERE status = 'ACTIVE'
+     WHERE salary > 5000
 ),
 department_summary AS (
     SELECT department_id,
            COUNT(*) AS employee_count
-      FROM active_employees
+      FROM high_earners
      GROUP BY department_id
 )
 SELECT *
@@ -115,8 +118,8 @@ SELECT e.employee_id,
        d.department_name
   FROM employees e
  INNER JOIN departments d ON e.department_id = d.department_id
-        AND e.status = 'ACTIVE'
-        AND d.status = 'ACTIVE';
+        AND e.salary > 5000
+        AND d.location_id = 1700;
 ```
 
 ### 7. CASE Expressions
@@ -130,9 +133,9 @@ SELECT e.employee_id,
 Example:
 
 ```sql
-SELECT CASE WHEN salary < 50000
+SELECT CASE WHEN salary < 5000
             THEN 'Low'
-            WHEN salary BETWEEN 50000 AND 100000
+            WHEN salary BETWEEN 5000 AND 10000
             THEN 'Medium'
             ELSE 'High'
        END AS salary_category
@@ -154,7 +157,7 @@ INSERT INTO employees (
             last_name,
             department_id
 ) VALUES (
-            1001,
+            208,
             'Jane',
             'Smith',
             20
@@ -174,8 +177,8 @@ Example:
 UPDATE employees
    SET first_name = 'John',
        last_name = 'Doe',
-       salary = 75000
- WHERE employee_id = 1001;
+       salary = 9000
+ WHERE employee_id = 207;
 ```
 
 ### 10. Comments
@@ -185,6 +188,25 @@ UPDATE employees
 - Add comments to explain complex logic only when explicitly requested
 - Place comments above the code they describe
 
+### 11. Subqueries and Derived Tables
+
+- Keep the opening `(` on the same line as the clause keyword (for example, `FROM (`)
+- Indent the subquery body one level deeper so it sits to the right of the `(`, and align its clause keywords on their own river
+- Place the closing `)` on a new line, aligned with the opening `(` (unlike CTEs, where `)` aligns with `WITH`)
+- A short subquery may stay on one line, such as `IN (SELECT department_id FROM departments)`
+
+Example:
+
+```sql
+SELECT COUNT(*)
+  FROM (
+           SELECT employee_id
+             FROM employees
+            WHERE salary > 5000
+            ORDER BY employee_id
+       );
+```
+
 ## Bundled Resources
 
 ### References (`references/`)
@@ -192,6 +214,14 @@ UPDATE employees
 - `references/sql-formatting-rules.md` - Complete formatting specification with all 13 rules and detailed examples
 
 Load this reference when working with complex SQL formatting scenarios or when users need detailed rule explanations.
+
+### Examples (`examples/`)
+
+- `examples/unformatted.sql` - Before-formatting samples
+- `examples/formatted.sql` - The same statements after the formatting rules are applied
+- `examples/complex-query.sql` - Comprehensive query exercising all 13 rules
+
+Compare the unformatted and formatted files to demonstrate the rules in practice.
 
 ## How to Use This Skill
 

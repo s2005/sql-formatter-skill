@@ -53,13 +53,13 @@ Click the button below to install the custom chat mode in VS Code:
 
 ```bash
 # Add the marketplace
-/plugin marketplace add https://github.com/s2005/sql-formatter-skill
+/plugin marketplace add s2005/sql-formatter-skill
 
-# Install the skill
-/skill install sql-formatter
-
-# Restart Claude Code
+# Install the plugin
+/plugin install sql-formatter@sql-formatter-skill
 ```
+
+After installation, the skill activates automatically when you ask to format SQL (see [Usage](#usage)). Restart Claude Code if the skill does not appear immediately.
 
 ## Usage
 
@@ -78,7 +78,7 @@ Once installed, Claude automatically activates this skill when you:
 ```text
 Format this SQL query
 
-select employee_id,first_name,last_name from employees where department_id=10 and status='ACTIVE' order by last_name;
+select employee_id,first_name,last_name from employees where department_id=50 and salary>5000 order by last_name;
 ```
 
 **Complex query:**
@@ -86,7 +86,7 @@ select employee_id,first_name,last_name from employees where department_id=10 an
 ```text
 Format this SQL with CTEs and joins
 
-with dept_avg as(select department_id,avg(salary)as avg_salary from employees where status='ACTIVE' group by department_id)select e.employee_id,e.first_name,e.salary,d.avg_salary from employees e join dept_avg d on e.department_id=d.department_id where e.salary>d.avg_salary;
+with dept_avg as(select department_id,avg(salary)as avg_salary from employees group by department_id)select e.employee_id,e.first_name,e.salary,d.avg_salary from employees e join dept_avg d on e.department_id=d.department_id where e.salary>d.avg_salary;
 ```
 
 **File formatting:**
@@ -98,19 +98,29 @@ Format the SQL in queries/report.sql
 ## Repository Structure
 
 ```
-.github/
-├── skills/
-│   └── sql-formatter-skill/
-│       ├── SKILL.md                # Main skill definition
-│       ├── examples/
-│       │   ├── README.md           # Examples documentation
-│       │   ├── unformatted.sql     # Before formatting
-│       │   ├── formatted.sql       # After formatting
-│       │   └── complex-query.sql   # Comprehensive example
-│       └── references/
-│           └── sql-formatting-rules.md  # Complete 13-rule specification
-└── chatmodes/
-    └── sql-formatter.chatmode.md   # VS Code chat mode definition
+.
+├── .claude-plugin/
+│   ├── marketplace.json            # Claude Code marketplace manifest
+│   └── plugin.json                 # Claude Code plugin manifest
+├── .github/
+│   ├── skills/
+│   │   └── sql-formatter-skill/
+│   │       ├── SKILL.md            # Main skill definition
+│   │       ├── examples/
+│   │       │   ├── README.md       # Examples documentation
+│   │       │   ├── unformatted.sql # Before formatting
+│   │       │   ├── formatted.sql   # After formatting
+│   │       │   └── complex-query.sql  # Comprehensive example
+│   │       └── references/
+│   │           └── sql-formatting-rules.md  # Complete 13-rule specification
+│   ├── chatmodes/
+│   │   └── sql-formatter.chatmode.md   # VS Code chat mode definition
+│   └── copilot-instructions.md     # GitHub Copilot custom instructions
+├── docs/
+│   └── vscode_skills.md            # VS Code agents vs. skills guide
+├── CLAUDE.md
+├── LICENSE
+└── README.md
 ```
 
 ## 13 Formatting Rules
@@ -135,7 +145,7 @@ Format the SQL in queries/report.sql
 
 **Before:**
 ```sql
-select employee_id,first_name,last_name,email,salary from employees where department_id=10 and status='ACTIVE' order by last_name;
+select employee_id,first_name,last_name,email,salary from employees where department_id=50 and salary>5000 order by last_name;
 ```
 
 **After:**
@@ -146,8 +156,8 @@ SELECT employee_id,
        email,
        salary
   FROM employees
- WHERE department_id = 10
-   AND status = 'ACTIVE'
+ WHERE department_id = 50
+   AND salary > 5000
  ORDER BY last_name;
 ```
 
@@ -155,7 +165,7 @@ SELECT employee_id,
 
 **Before:**
 ```sql
-select e.employee_id,e.first_name,e.last_name,d.department_name,j.job_title from employees e join departments d on e.department_id=d.department_id join jobs j on e.job_id=j.job_id where e.status='ACTIVE' and e.salary>50000;
+select e.employee_id,e.first_name,e.last_name,d.department_name,j.job_title from employees e join departments d on e.department_id=d.department_id join jobs j on e.job_id=j.job_id where e.salary>5000 and e.commission_pct is not null;
 ```
 
 **After:**
@@ -168,15 +178,15 @@ SELECT e.employee_id,
   FROM employees e
  INNER JOIN departments d ON e.department_id = d.department_id
  INNER JOIN jobs j ON e.job_id = j.job_id
- WHERE e.status = 'ACTIVE'
-   AND e.salary > 50000;
+ WHERE e.salary > 5000
+   AND e.commission_pct IS NOT NULL;
 ```
 
 ### CTE with CASE
 
 **Before:**
 ```sql
-with dept_stats as(select department_id,avg(salary)as avg_sal,count(*)as cnt from employees group by department_id)select d.department_name,ds.avg_sal,case when ds.avg_sal<50000 then 'Low' when ds.avg_sal<100000 then 'Medium' else 'High' end as pay_level from dept_stats ds join departments d on ds.department_id=d.department_id;
+with dept_stats as(select department_id,avg(salary)as avg_sal,count(*)as cnt from employees group by department_id)select d.department_name,ds.avg_sal,case when ds.avg_sal<5000 then 'Low' when ds.avg_sal<10000 then 'Medium' else 'High' end as pay_level from dept_stats ds join departments d on ds.department_id=d.department_id;
 ```
 
 **After:**
@@ -190,9 +200,9 @@ WITH dept_stats AS (
 )
 SELECT d.department_name,
        ds.avg_sal,
-       CASE WHEN ds.avg_sal < 50000
+       CASE WHEN ds.avg_sal < 5000
             THEN 'Low'
-            WHEN ds.avg_sal < 100000
+            WHEN ds.avg_sal < 10000
             THEN 'Medium'
             ELSE 'High'
        END AS pay_level

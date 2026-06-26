@@ -4,21 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains a Claude Code skill for formatting SQL code according to Oracle Database 19 best practices. The skill transforms unformatted SQL queries into well-structured, properly indented, and professionally styled code.
+This repository packages a single SQL-formatting skill for two platforms: as a Claude Code plugin (installed via the bundled marketplace manifest) and as a GitHub Copilot custom chat mode for VS Code. The skill transforms unformatted SQL queries into well-structured, properly indented, and professionally styled code according to Oracle Database 19 best practices.
 
 ## Repository Structure
 
 ```
-.github/skills/sql-formatter-skill/
-├── SKILL.md              # Main skill definition and usage instructions
-├── examples/
-│   ├── README.md         # Examples documentation
-│   ├── unformatted.sql   # Before formatting examples
-│   ├── formatted.sql     # After formatting examples
-│   └── complex-query.sql # Comprehensive example showing all rules
-└── references/
-    └── sql-formatting-rules.md  # Complete 13-rule specification
+.
+├── .claude-plugin/
+│   ├── marketplace.json            # Claude Code marketplace manifest
+│   └── plugin.json                 # Claude Code plugin manifest (reuses the skill below)
+├── .github/
+│   ├── skills/
+│   │   └── sql-formatter-skill/
+│   │       ├── SKILL.md            # Main skill definition and usage instructions
+│   │       ├── examples/
+│   │       │   ├── README.md       # Examples documentation
+│   │       │   ├── unformatted.sql # Before formatting examples
+│   │       │   ├── formatted.sql   # After formatting examples
+│   │       │   └── complex-query.sql  # Comprehensive example showing all rules
+│   │       └── references/
+│   │           └── sql-formatting-rules.md  # Complete 13-rule specification
+│   ├── chatmodes/
+│   │   └── sql-formatter.chatmode.md   # VS Code chat mode definition
+│   └── copilot-instructions.md     # GitHub Copilot custom instructions
+├── docs/
+│   └── vscode_skills.md            # VS Code agents vs. skills guide
+├── CLAUDE.md
+├── LICENSE
+└── README.md
 ```
+
+Both platforms share the same skill folder: the Claude Code plugin points its `skills` entry at `.github/skills/sql-formatter-skill` in `.claude-plugin/marketplace.json`, so there is no duplicated skill content.
 
 ## SQL Formatting Rules
 

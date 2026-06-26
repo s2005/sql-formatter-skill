@@ -5,8 +5,8 @@ SELECT employee_id,
        email,
        salary
   FROM employees
- WHERE department_id = 10
-   AND status = 'ACTIVE'
+ WHERE department_id = 50
+   AND salary > 5000
  ORDER BY last_name;
 
 -- Example 2: JOIN query (formatted)
@@ -18,8 +18,8 @@ SELECT e.employee_id,
   FROM employees e
  INNER JOIN departments d ON e.department_id = d.department_id
  INNER JOIN jobs j ON e.job_id = j.job_id
- WHERE e.status = 'ACTIVE'
-   AND e.salary > 50000;
+ WHERE e.salary > 5000
+   AND e.commission_pct IS NOT NULL;
 
 -- Example 3: INSERT (formatted)
 INSERT INTO employees (
@@ -33,23 +33,23 @@ INSERT INTO employees (
             salary,
             department_id
 ) VALUES (
-            1001,
+            207,
             'John',
             'Doe',
-            'john.doe@example.com',
-            '555-0100',
+            'JDOE',
+            '650.555.0100',
             SYSDATE,
             'IT_PROG',
-            75000,
+            9000,
             60
 );
 
 -- Example 4: UPDATE (formatted)
 UPDATE employees
    SET salary = salary * 1.1,
-       last_modified = SYSDATE
- WHERE department_id = 10
-   AND performance_rating >= 4
+       commission_pct = 0.2
+ WHERE department_id = 80
+   AND salary < 10000
    AND hire_date < ADD_MONTHS(SYSDATE, -12);
 
 -- Example 5: CASE expression (formatted)
@@ -57,11 +57,11 @@ SELECT employee_id,
        first_name,
        last_name,
        salary,
-       CASE WHEN salary < 50000
+       CASE WHEN salary < 5000
             THEN 'Low'
-            WHEN salary BETWEEN 50000 AND 100000
+            WHEN salary BETWEEN 5000 AND 10000
             THEN 'Medium'
-            WHEN salary > 100000
+            WHEN salary > 10000
             THEN 'High'
             ELSE 'Unknown'
        END AS salary_grade
@@ -72,7 +72,6 @@ WITH dept_avg AS (
     SELECT department_id,
            AVG(salary) AS avg_salary
       FROM employees
-     WHERE status = 'ACTIVE'
      GROUP BY department_id
 )
 SELECT e.employee_id,
