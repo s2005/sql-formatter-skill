@@ -1,7 +1,8 @@
--- Complex Employee Performance Report
+-- Complex Employee Compensation Report
 -- Demonstrates all formatting rules in a single comprehensive query
+-- Based on the Oracle HR sample schema (employees, departments, jobs)
 
-WITH employee_metrics AS (
+WITH employee_base AS (
     SELECT e.employee_id,
            e.first_name,
            e.last_name,
@@ -13,110 +14,92 @@ WITH employee_metrics AS (
            e.job_id,
            e.manager_id,
            MONTHS_BETWEEN(SYSDATE, e.hire_date) / 12 AS tenure_years,
-           NVL(p.performance_rating, 0) AS performance_rating,
-           NVL(p.goal_achievement_pct, 0) AS goal_achievement
+           NVL(e.commission_pct, 0) * e.salary AS commission_amount
       FROM employees e
-      LEFT JOIN performance_reviews p ON e.employee_id = p.employee_id
-        AND p.review_year = EXTRACT(YEAR FROM SYSDATE) - 1
-        AND p.review_status = 'APPROVED'
-     WHERE e.status = 'ACTIVE'
-       AND e.hire_date IS NOT NULL
+     WHERE e.salary > 0
+       AND e.department_id IS NOT NULL
 ),
 department_stats AS (
     SELECT department_id,
            COUNT(*) AS employee_count,
            AVG(salary) AS avg_salary,
            MIN(salary) AS min_salary,
-           MAX(salary) AS max_salary,
-           AVG(performance_rating) AS avg_performance
-      FROM employee_metrics
+           MAX(salary) AS max_salary
+      FROM employee_base
      GROUP BY department_id
     HAVING COUNT(*) >= 3
 ),
-top_performers AS (
-    SELECT em.employee_id,
-           em.department_id,
+top_earners AS (
+    SELECT eb.employee_id,
+           eb.department_id,
            RANK() OVER (
-               PARTITION BY em.department_id
-               ORDER BY em.performance_rating DESC,
-                        em.goal_achievement DESC
+               PARTITION BY eb.department_id
+               ORDER BY eb.salary DESC,
+                        eb.commission_amount DESC
            ) AS dept_rank
-      FROM employee_metrics em
-     WHERE em.performance_rating >= 4
+      FROM employee_base eb
 )
-SELECT em.employee_id,
-       em.first_name || ' ' || em.last_name AS full_name,
-       em.email,
+SELECT eb.employee_id,
+       eb.first_name || ' ' || eb.last_name AS full_name,
+       eb.email,
        d.department_name,
        j.job_title,
        m.first_name || ' ' || m.last_name AS manager_name,
-       em.salary,
-       NVL(em.commission_pct, 0) * em.salary AS commission_amount,
+       eb.salary,
+       eb.commission_amount,
        ds.avg_salary AS dept_avg_salary,
-       ROUND(em.tenure_years, 1) AS years_with_company,
-       em.performance_rating,
-       em.goal_achievement,
-       CASE WHEN em.salary > ds.avg_salary * 1.2
+       ROUND(eb.tenure_years, 1) AS years_with_company,
+       CASE WHEN eb.salary > ds.avg_salary * 1.2
             THEN 'Well Above Average'
-            WHEN em.salary > ds.avg_salary * 1.1
+            WHEN eb.salary > ds.avg_salary * 1.1
             THEN 'Above Average'
-            WHEN em.salary >= ds.avg_salary * 0.9
+            WHEN eb.salary >= ds.avg_salary * 0.9
             THEN 'Average'
-            WHEN em.salary >= ds.avg_salary * 0.8
+            WHEN eb.salary >= ds.avg_salary * 0.8
             THEN 'Below Average'
             ELSE 'Well Below Average'
        END AS salary_comparison,
-       CASE WHEN tp.dept_rank IS NOT NULL
-            THEN 'Top Performer (Rank ' || tp.dept_rank || ')'
-            WHEN em.performance_rating >= 4
-            THEN 'High Performer'
-            WHEN em.performance_rating >= 3
-            THEN 'Solid Performer'
-            WHEN em.performance_rating >= 2
-            THEN 'Needs Improvement'
-            ELSE 'Performance Issues'
-       END AS performance_category,
-       CASE WHEN em.tenure_years >= 10 AND em.performance_rating >= 4
+       CASE WHEN te.dept_rank IS NOT NULL
+            THEN 'Top Earner (Rank ' || te.dept_rank || ')'
+            WHEN eb.salary >= 10000
+            THEN 'High Earner'
+            WHEN eb.salary >= 6000
+            THEN 'Mid Earner'
+            ELSE 'Entry Level'
+       END AS earner_category,
+       CASE WHEN eb.tenure_years >= 10
             THEN 'Eligible for Senior Leadership'
-            WHEN em.tenure_years >= 7 AND em.performance_rating >= 4
+            WHEN eb.tenure_years >= 7
             THEN 'Eligible for Management'
-            WHEN em.tenure_years >= 5 AND em.performance_rating >= 3
+            WHEN eb.tenure_years >= 5
             THEN 'Eligible for Promotion'
-            WHEN em.tenure_years >= 3 AND em.performance_rating >= 3
+            WHEN eb.tenure_years >= 3
             THEN 'Mid-Career Development'
-            WHEN em.tenure_years >= 1
+            WHEN eb.tenure_years >= 1
             THEN 'Early Career'
             ELSE 'New Hire'
        END AS career_stage,
-       CASE WHEN em.performance_rating >= 4 AND em.salary < ds.avg_salary
-            THEN em.salary * 0.15
-            WHEN em.performance_rating >= 4
-            THEN em.salary * 0.10
-            WHEN em.performance_rating >= 3 AND em.tenure_years >= 5
-            THEN em.salary * 0.08
-            WHEN em.performance_rating >= 3
-            THEN em.salary * 0.05
-            ELSE 0
-       END AS recommended_bonus,
-       ds.employee_count AS dept_size,
-       ds.avg_performance AS dept_avg_performance
-  FROM employee_metrics em
- INNER JOIN departments d ON em.department_id = d.department_id
-        AND d.status = 'ACTIVE'
- INNER JOIN jobs j ON em.job_id = j.job_id
-  LEFT JOIN employees m ON em.manager_id = m.employee_id
-  LEFT JOIN department_stats ds ON em.department_id = ds.department_id
-  LEFT JOIN top_performers tp ON em.employee_id = tp.employee_id
- WHERE (em.performance_rating >= 2 OR em.tenure_years >= 5)
-   AND em.salary > 0
+       CASE WHEN eb.salary < ds.avg_salary
+            THEN eb.salary * 0.15
+            WHEN eb.tenure_years >= 5
+            THEN eb.salary * 0.10
+            ELSE eb.salary * 0.05
+       END AS recommended_increase,
+       ds.employee_count AS dept_size
+  FROM employee_base eb
+ INNER JOIN departments d ON eb.department_id = d.department_id
+ INNER JOIN jobs j ON eb.job_id = j.job_id
+  LEFT JOIN employees m ON eb.manager_id = m.employee_id
+  LEFT JOIN department_stats ds ON eb.department_id = ds.department_id
+  LEFT JOIN top_earners te ON eb.employee_id = te.employee_id
+ WHERE eb.salary > 0
    AND (
-           (em.department_id IN (10, 20, 30) AND em.salary >= 40000)
-        OR (em.department_id IN (40, 50, 60) AND em.salary >= 50000)
-        OR (em.department_id NOT IN (10, 20, 30, 40, 50, 60))
+           (eb.department_id IN (10, 20, 30) AND eb.salary >= 4000)
+        OR (eb.department_id IN (50, 60, 80) AND eb.salary >= 5000)
+        OR (eb.department_id NOT IN (10, 20, 30, 50, 60, 80))
        )
  ORDER BY d.department_name,
-          CASE WHEN tp.dept_rank IS NOT NULL THEN tp.dept_rank ELSE 999 END,
-          em.performance_rating DESC,
-          em.salary DESC,
-          em.last_name,
-          em.first_name;
+          CASE WHEN te.dept_rank IS NOT NULL THEN te.dept_rank ELSE 999 END,
+          eb.salary DESC,
+          eb.last_name,
+          eb.first_name;

@@ -24,7 +24,7 @@ This document provides the complete specification for SQL code formatting follow
 
 - When aliasing, use the AS keyword
 - Ensure there is a space on either side of the AS keyword
-- Example: `table_name AS tn` or `column_name AS alias`
+- Example: `employees AS e` or `last_name AS surname`
 
 ## Rule 5: Single Line Initial Column/Condition
 
@@ -34,11 +34,11 @@ This document provides the complete specification for SQL code formatting follow
 
 **Example:**
 ```sql
-SELECT first_column,
-       second_column
-  FROM table_name
- WHERE first_condition
-   AND second_condition;
+SELECT employee_id,
+       first_name
+  FROM employees
+ WHERE department_id = 50
+   AND salary > 5000;
 ```
 
 ## Rule 6: Line Breaks
@@ -56,22 +56,22 @@ SELECT first_column,
 
 **Example 1: Basic SELECT**
 ```sql
-SELECT first_column,
-       second_column,
-       third_column
-  FROM table_name
- WHERE first_condition
-   AND second_condition
-   AND third_condition;
+SELECT employee_id,
+       first_name,
+       last_name
+  FROM employees
+ WHERE department_id = 50
+   AND salary > 5000
+   AND commission_pct IS NOT NULL;
 ```
 
 **Example 2: UPDATE with Hint**
 ```sql
 UPDATE /*+ ENABLE_PARALLEL_DML */
-       table_name
-   SET first_column = expression(1)
- WHERE first_condition
-   AND second_condition;
+       employees
+   SET salary = salary * 1.1
+ WHERE department_id = 80
+   AND commission_pct IS NOT NULL;
 ```
 
 **Example 3: INSERT Statement**
@@ -82,19 +82,19 @@ INSERT INTO employees (
             last_name,
             department_id
 ) VALUES (
-            1,
+            208,
             'John',
             'Doe',
-            4
+            60
 );
 ```
 
 **Example 4: CREATE TABLE**
 ```sql
--- Create a test table
-CREATE TABLE test_table (
-    id       NUMBER           PRIMARY KEY,
-    name VARCHAR2(50)
+-- Create the regions lookup table
+CREATE TABLE regions (
+    region_id     NUMBER           PRIMARY KEY,
+    region_name VARCHAR2(25)
 );
 ```
 
@@ -108,18 +108,18 @@ CREATE TABLE test_table (
 
 **Example:**
 ```sql
-WITH active_employees AS (
+WITH high_earners AS (
     SELECT employee_id,
            first_name,
            last_name,
            department_id
       FROM employees
-     WHERE status = 'ACTIVE'
+     WHERE salary > 5000
 ),
 department_counts AS (
     SELECT department_id,
            COUNT(*) AS employee_count
-      FROM active_employees
+      FROM high_earners
      GROUP BY department_id
 )
 SELECT d.department_name,
@@ -147,11 +147,11 @@ SELECT e.employee_id,
        j.job_title
   FROM employees e
  INNER JOIN departments d ON e.department_id = d.department_id
-        AND d.status = 'ACTIVE'
+        AND d.location_id = 1700
   LEFT JOIN jobs j ON e.job_id = j.job_id
-        AND j.is_current = 'Y'
- WHERE e.status = 'ACTIVE'
-   AND e.hire_date >= DATE '2020-01-01';
+        AND j.max_salary > 10000
+ WHERE e.salary > 5000
+   AND e.hire_date >= DATE '2005-01-01';
 ```
 
 ## Rule 10: Commentaries
@@ -163,26 +163,25 @@ SELECT e.employee_id,
 
 **Example:**
 ```sql
--- Retrieve active employees hired in the last year
+-- Retrieve employees hired in the last year
 SELECT employee_id,
        first_name,
        last_name
   FROM employees
- WHERE status = 'ACTIVE'
-   AND hire_date >= ADD_MONTHS(SYSDATE, -12);
+ WHERE hire_date >= ADD_MONTHS(SYSDATE, -12);
 
 /*
  * Complex calculation for bonus eligibility
- * Considers tenure, performance rating, and department budget
+ * Considers tenure and salary band
  */
 SELECT employee_id,
-       CASE WHEN tenure_years > 5 AND performance_rating >= 4
-            THEN base_salary * 0.15
-            WHEN tenure_years > 2 AND performance_rating >= 3
-            THEN base_salary * 0.10
-            ELSE base_salary * 0.05
+       CASE WHEN MONTHS_BETWEEN(SYSDATE, hire_date) / 12 > 5 AND salary >= 10000
+            THEN salary * 0.15
+            WHEN MONTHS_BETWEEN(SYSDATE, hire_date) / 12 > 2 AND salary >= 6000
+            THEN salary * 0.10
+            ELSE salary * 0.05
        END AS bonus_amount
-  FROM employee_metrics;
+  FROM employees;
 ```
 
 ## Rule 11: Grouping
@@ -199,9 +198,9 @@ SELECT employee_id,
        last_name,
        salary
   FROM employees
- WHERE (department_id = 10 AND status = 'ACTIVE')
-    OR (department_id = 20 AND status = 'ACTIVE')
-    OR (salary > 100000 AND job_level >= 5);
+ WHERE (department_id = 10 AND salary >= 4000)
+    OR (department_id = 20 AND salary >= 6000)
+    OR (salary > 15000 AND commission_pct IS NOT NULL);
 ```
 
 ## Rule 12: Ordering
@@ -241,13 +240,13 @@ SELECT employee_id,
 
 **Example:**
 ```sql
-SELECT CASE WHEN condition1
-            THEN result1
-            WHEN condition2
-            THEN result2
-            ELSE result3
-       END AS column_alias
-  FROM table_name;
+SELECT CASE WHEN salary < 5000
+            THEN 'Low'
+            WHEN salary BETWEEN 5000 AND 10000
+            THEN 'Medium'
+            ELSE 'High'
+       END AS salary_band
+  FROM employees;
 ```
 
 **Complex Example:**
@@ -255,13 +254,13 @@ SELECT CASE WHEN condition1
 SELECT employee_id,
        first_name,
        last_name,
-       CASE WHEN salary < 50000
+       CASE WHEN salary < 5000
             THEN 'Entry Level'
-            WHEN salary BETWEEN 50000 AND 80000
+            WHEN salary BETWEEN 5000 AND 8000
             THEN 'Mid Level'
-            WHEN salary BETWEEN 80000 AND 120000
+            WHEN salary BETWEEN 8000 AND 12000
             THEN 'Senior Level'
-            WHEN salary > 120000
+            WHEN salary > 12000
             THEN 'Executive Level'
             ELSE 'Unclassified'
        END AS salary_grade,
@@ -272,7 +271,7 @@ SELECT employee_id,
             ELSE 'Other'
        END AS department_category
   FROM employees
- WHERE status = 'ACTIVE'
+ WHERE salary > 0
  ORDER BY salary DESC;
 ```
 
@@ -281,21 +280,20 @@ SELECT employee_id,
 This example demonstrates all formatting rules applied together:
 
 ```sql
--- Employee performance report with department and job information
+-- Employee compensation report with department and job information
 WITH employee_metrics AS (
     SELECT e.employee_id,
            e.first_name,
            e.last_name,
            e.hire_date,
            e.salary,
+           e.commission_pct,
            e.department_id,
            e.job_id,
            MONTHS_BETWEEN(SYSDATE, e.hire_date) / 12 AS tenure_years,
-           NVL(p.performance_rating, 0) AS performance_rating
+           NVL(e.commission_pct, 0) * e.salary AS commission_amount
       FROM employees e
-      LEFT JOIN performance_reviews p ON e.employee_id = p.employee_id
-        AND p.review_year = EXTRACT(YEAR FROM SYSDATE) - 1
-     WHERE e.status = 'ACTIVE'
+     WHERE e.salary > 0
 ),
 department_stats AS (
     SELECT department_id,
@@ -316,9 +314,9 @@ SELECT em.employee_id,
             THEN 'Average'
             ELSE 'Below Average'
        END AS salary_comparison,
-       CASE WHEN em.tenure_years >= 10 AND em.performance_rating >= 4
+       CASE WHEN em.tenure_years >= 10 AND em.salary >= 10000
             THEN 'Eligible for Senior Role'
-            WHEN em.tenure_years >= 5 AND em.performance_rating >= 3
+            WHEN em.tenure_years >= 5 AND em.salary >= 6000
             THEN 'Eligible for Promotion'
             WHEN em.tenure_years >= 2
             THEN 'Mid-Career'
@@ -327,10 +325,10 @@ SELECT em.employee_id,
        ROUND(em.tenure_years, 1) AS years_with_company
   FROM employee_metrics em
  INNER JOIN departments d ON em.department_id = d.department_id
-        AND d.status = 'ACTIVE'
+        AND d.location_id = 1700
  INNER JOIN jobs j ON em.job_id = j.job_id
   LEFT JOIN department_stats ds ON em.department_id = ds.department_id
- WHERE (em.performance_rating >= 3 OR em.tenure_years >= 5)
+ WHERE (em.salary >= 6000 OR em.tenure_years >= 5)
    AND em.salary > 0
  ORDER BY d.department_name,
           em.salary DESC,
@@ -374,33 +372,52 @@ CREATE INDEX emp_name_idx ON employees (last_name, first_name);
 
 ```sql
 DELETE FROM employees
- WHERE employee_id = 1001;
+ WHERE employee_id = 207;
 
 DELETE FROM employees
  WHERE department_id = 10
-   AND status = 'INACTIVE'
-   AND hire_date < DATE '2010-01-01';
+   AND commission_pct IS NULL
+   AND hire_date < DATE '2000-01-01';
 ```
 
 ### MERGE Statements
 
 ```sql
 MERGE INTO employees e
-USING employee_updates u ON (e.employee_id = u.employee_id)
+USING (SELECT employee_id,
+              salary * 1.1 AS new_salary,
+              commission_pct + 0.05 AS new_commission
+         FROM employees
+        WHERE department_id = 80) u ON (e.employee_id = u.employee_id)
  WHEN MATCHED THEN
       UPDATE SET e.salary = u.new_salary,
-                 e.job_id = u.new_job_id
- WHEN NOT MATCHED THEN
-      INSERT (employee_id,
-              first_name,
-              last_name,
-              salary,
-              job_id)
-      VALUES (u.employee_id,
-              u.first_name,
-              u.last_name,
-              u.new_salary,
-              u.new_job_id);
+                 e.commission_pct = u.new_commission;
+```
+
+### Subqueries and Derived Tables (Inline Views)
+
+When a subquery is used as a table source in the FROM clause (a derived table or inline view), or as any multi-line parenthesized subquery:
+
+- Keep the opening parenthesis `(` on the same line as the clause keyword (for example, `FROM (`)
+- Place the subquery on new lines, indented one level (4 spaces) deeper, so its body sits to the right of the opening `(`
+- Align the subquery's own clause keywords (SELECT, FROM, WHERE, ORDER BY, etc.) on their own river
+- Place the closing parenthesis `)` on a new line, aligned with the opening `(`
+- A short subquery may stay on a single line (for example, `IN (SELECT department_id FROM departments)`)
+
+Note: this differs from CTEs (Rule 8), where the closing `)` aligns with the WITH keyword rather than with the opening `(`.
+
+**Example:**
+```sql
+SELECT CASE WHEN COUNT(*) = 0
+            THEN TO_CLOB('[]')
+            ELSE JSON_ARRAYAGG(JSON_OBJECT(*) RETURNING CLOB)
+       END
+  FROM (
+           SELECT *
+             FROM employees
+            WHERE department_id IN (SELECT department_id FROM departments)
+            ORDER BY employee_id
+       );
 ```
 
 ## Summary

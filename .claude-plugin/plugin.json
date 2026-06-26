@@ -1,0 +1,18 @@
+{
+  "name": "sql-formatter",
+  "description": "Format, polish, and document SQL code following Oracle Database 19 best practices with consistent style and readability.",
+  "version": "1.0.0",
+  "author": {
+    "name": "s2005"
+  },
+  "homepage": "https://github.com/s2005/sql-formatter-skill",
+  "repository": "https://github.com/s2005/sql-formatter-skill",
+  "license": "MIT",
+  "keywords": [
+    "sql",
+    "oracle",
+    "formatter",
+    "formatting",
+    "sql-formatter"
+  ]
+}

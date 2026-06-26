@@ -84,7 +84,7 @@ These examples demonstrate all 13 formatting rules:
 
 ## Notes
 
-- All examples use Oracle Database 19 syntax
+- All examples use the Oracle HR sample schema (employees, departments, jobs) and Oracle Database 19 syntax
 - Examples focus on formatting, not query optimization
 - Formatted queries preserve the original logic and functionality
 - Use these as reference when formatting your own SQL code

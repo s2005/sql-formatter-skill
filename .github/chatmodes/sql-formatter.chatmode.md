@@ -42,63 +42,56 @@ Always place comments on separate lines before the command instead.
 
 ## Formatting Rules
 
-### Rule 1: Keywords and Identifiers
+Apply these 13 rules. The full specification with detailed examples is in `references/sql-formatting-rules.md`.
 
-- **SQL Keywords**: UPPERCASE (SELECT, FROM, WHERE, INSERT, UPDATE, DELETE, CREATE, etc.)
-- **Identifiers**: lowercase (column names, table names, aliases)
-- **Consistency**: Maintain throughout entire query
+1. **Keywords** - SQL keywords UPPERCASE (SELECT, FROM, WHERE, INSERT, UPDATE, DELETE, CREATE, etc.); identifiers (columns, tables, aliases) lowercase
+2. **Indentation** - 4 spaces, no tabs; each nested level adds 4 spaces
+3. **Whitespace** - Single space on either side of operators and after commas
+4. **Aliasing** - Use the AS keyword with a space on either side
+5. **Single Line Initial** - First column/condition on the same line as the clause keyword
+6. **Line Breaks** - New line for each clause and for each subsequent column, condition, or table
+7. **Vertical Alignment** - Align subsequent items vertically with the first item
+8. **CTEs** - `WITH name AS (` with the closing `)` aligned to `WITH`; separate multiple CTEs with a comma
+9. **Joins** - Explicit JOIN type; JOIN and first ON on the same line; additional ON conditions aligned below with AND
+10. **Comments** - `--` for single-line, `/* */` for multi-line, placed above the code they describe
+11. **Grouping** - Parentheses for related conditions, one grouped condition per line
+12. **Ordering** - List columns and ORDER BY expressions in a logical order
+13. **CASE Expressions** - First WHEN on the CASE line; WHEN/THEN/ELSE aligned vertically; END aligned with CASE
 
-### Rule 2: Indentation
-
-- Use **4 spaces** for indentation (no tabs)
-- Each nested level adds 4 spaces
-- Sub-queries indented one level deeper than parent
-
-### Rule 3: Whitespace
-
-- Single space on either side of operators (=, <, >, <=, >=, !=, ||, +, -, *, /)
-- Single space after commas
-- Single space around AS keyword
-
-### Rule 4: First Item on Same Line
-
-The first column or condition starts on the same line as the clause keyword. Subsequent items go on new lines, aligned vertically.
-
-### Rule 5: Vertical Alignment
-
-Align subsequent columns, conditions, and table names vertically with the first item:
+### Vertical Alignment
 
 ```sql
-SELECT first_column,
-       second_column,
-       third_column
-  FROM table_name
- WHERE first_condition
-   AND second_condition
-   AND third_condition;
+SELECT employee_id,
+       first_name,
+       last_name
+  FROM employees
+ WHERE department_id = 50
+   AND salary > 5000
+   AND commission_pct IS NOT NULL;
 ```
 
-### Rule 6: Common Table Expressions (CTEs)
+### Common Table Expressions (CTEs)
 
 ```sql
-WITH active_employees AS (
+WITH high_earners AS (
     SELECT employee_id,
            first_name,
-           last_name
+           last_name,
+           department_id
       FROM employees
-     WHERE status = 'ACTIVE'
+     WHERE salary > 5000
 ),
 department_summary AS (
     SELECT department_id,
            COUNT(*) AS employee_count
-      FROM active_employees
+      FROM high_earners
      GROUP BY department_id
 )
 SELECT *
   FROM department_summary;
 ```
 
-### Rule 7: JOIN Clauses
+### JOIN Clauses
 
 ```sql
 SELECT e.employee_id,
@@ -106,33 +99,41 @@ SELECT e.employee_id,
        d.department_name
   FROM employees e
  INNER JOIN departments d ON e.department_id = d.department_id
-        AND e.status = 'ACTIVE'
-        AND d.status = 'ACTIVE';
+        AND e.salary > 5000
+        AND d.location_id = 1700;
 ```
 
-- Explicitly specify JOIN type (INNER, LEFT, RIGHT, FULL)
-- Place JOIN and first ON condition on same line
-- Indent JOIN to align with FROM clause
-- Additional ON conditions on new lines with AND
-
-### Rule 8: CASE Expressions
+### CASE Expressions
 
 ```sql
-SELECT CASE WHEN salary < 50000
+SELECT CASE WHEN salary < 5000
             THEN 'Low'
-            WHEN salary BETWEEN 50000 AND 100000
+            WHEN salary BETWEEN 5000 AND 10000
             THEN 'Medium'
             ELSE 'High'
        END AS salary_category
   FROM employees;
 ```
 
-- Start CASE with first WHEN on same line
-- Align WHEN, THEN, ELSE vertically
-- Place END aligned with CASE
-- Column alias on same line as END
+### Subqueries and Derived Tables
 
-### Rule 9: INSERT Statements
+Keep the opening `(` on the clause line, indent the subquery body one level deeper so it sits to the right of the `(`, align its clause keywords on their own river, and align the closing `)` under the opening `(` (unlike CTEs, where `)` aligns with `WITH`). A short subquery may stay on one line.
+
+```sql
+SELECT COUNT(*)
+  FROM (
+           SELECT employee_id
+             FROM employees
+            WHERE salary > 5000
+            ORDER BY employee_id
+       );
+```
+
+## Statement Templates
+
+The 13 rules above apply equally to DML and DDL statements. Use these templates as the canonical layout.
+
+### INSERT
 
 ```sql
 INSERT INTO employees (
@@ -141,24 +142,24 @@ INSERT INTO employees (
             last_name,
             department_id
 ) VALUES (
-            1001,
+            208,
             'Jane',
             'Smith',
             20
 );
 ```
 
-### Rule 10: UPDATE Statements
+### UPDATE
 
 ```sql
 UPDATE employees
    SET first_name = 'John',
        last_name = 'Doe',
-       salary = 75000
- WHERE employee_id = 1001;
+       salary = 9000
+ WHERE employee_id = 207;
 ```
 
-### Rule 11: CREATE TABLE
+### CREATE TABLE
 
 ```sql
 CREATE TABLE employees (
@@ -170,23 +171,23 @@ CREATE TABLE employees (
 );
 ```
 
-### Rule 12: DELETE Statements
+### DELETE
 
 ```sql
 DELETE FROM employees
- WHERE employee_id = 1001;
+ WHERE employee_id = 207;
 ```
 
-### Rule 13: MERGE Statements
+### MERGE
 
 ```sql
 MERGE INTO employees e
-USING employee_updates u ON (e.employee_id = u.employee_id)
+USING (SELECT employee_id,
+              salary * 1.1 AS new_salary
+         FROM employees
+        WHERE department_id = 80) u ON (e.employee_id = u.employee_id)
  WHEN MATCHED THEN
-      UPDATE SET e.salary = u.new_salary
- WHEN NOT MATCHED THEN
-      INSERT (employee_id, first_name, last_name)
-      VALUES (u.employee_id, u.first_name, u.last_name);
+      UPDATE SET e.salary = u.new_salary;
 ```
 
 ## Common Scenarios
@@ -212,7 +213,7 @@ SELECT employee_id,
 
 **Input:**
 ```sql
-with dept_avg as(select department_id,avg(salary)as avg_salary from employees where status='ACTIVE' group by department_id)select e.employee_id,e.first_name,e.salary,d.avg_salary from employees e join dept_avg d on e.department_id=d.department_id where e.salary>d.avg_salary;
+with dept_avg as(select department_id,avg(salary)as avg_salary from employees group by department_id)select e.employee_id,e.first_name,e.salary,d.avg_salary from employees e join dept_avg d on e.department_id=d.department_id where e.salary>d.avg_salary;
 ```
 
 **Output:**
@@ -221,7 +222,6 @@ WITH dept_avg AS (
     SELECT department_id,
            AVG(salary) AS avg_salary
       FROM employees
-     WHERE status = 'ACTIVE'
      GROUP BY department_id
 )
 SELECT e.employee_id,
@@ -237,15 +237,15 @@ SELECT e.employee_id,
 
 **Input:**
 ```sql
-select employee_id,case when salary<50000 then 'Low' when salary between 50000 and 100000 then 'Medium' else 'High' end as salary_grade from employees;
+select employee_id,case when salary<5000 then 'Low' when salary between 5000 and 10000 then 'Medium' else 'High' end as salary_grade from employees;
 ```
 
 **Output:**
 ```sql
 SELECT employee_id,
-       CASE WHEN salary < 50000
+       CASE WHEN salary < 5000
             THEN 'Low'
-            WHEN salary BETWEEN 50000 AND 100000
+            WHEN salary BETWEEN 5000 AND 10000
             THEN 'Medium'
             ELSE 'High'
        END AS salary_grade
